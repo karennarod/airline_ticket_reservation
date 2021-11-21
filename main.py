@@ -33,7 +33,7 @@ def public_view():
     #today = str(date.today())
     #print(today)
 
-    query = "SELECT * FROM flight WHERE departure_date >= '11-20-2021'"
+    query = "SELECT * FROM flight WHERE departure_date >= '11-20-2021'" #FIX
     
     queries = []
     departure_date = request.form.get('departure_date')
@@ -48,9 +48,9 @@ def public_view():
     if arrival_airport != '':
         queries.append("arrival_airport = '%s'" % arrival_airport)
     if departure_date != '':
-        queries.append("departure_date = '%s'" % departure_date)
+        queries.append("departure_date = '%s'" % departure_date) #REFORMAT
     if arrival_date != '':
-        queries.append("arrival_date = '%s'" % arrival_date)
+        queries.append("arrival_date = '%s'" % arrival_date) #REFORMAT
     if queries:
         query += " AND " + " AND ".join(queries)
     print(query) 
