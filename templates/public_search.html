@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Find a Flight!</title>
+</head>
+<body>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<style type="text/css">
+    h1, body{
+        font-family: Verdana;
+        font-style:  normal;
+    }
+</style>
+<h1>Find a Flight</h1>
+<h3>Search for future flights:</h3>
+    <form action = "/public_view" method = "POST">
+        <input type = "date-time" name = "departure_date" placeholder = "mm-dd-yyyy"/>
+        <input type = "date-time" name = "arrival_date" placeholder = "mm-dd-yyyy"/></br>
+        <!--<input type = "text" name = "departure_city" placeholder = "departure city" pattern = "{1,20}"/>
+        <input type = "text" name = "arrival_city" placeholder = "arrival city" pattern = "{1,20}"/></br> 
+      -->
+        <input type = "text" name = "departure_airport" placeholder = "departure airport" pattern = "{1,20}"/>
+        <input type = "text" name = "arrival_airport" placeholder = "arrival airport" pattern = "{1,20}"/></br>
+        <input type = "submit" value = "Search" /></br>
+    </form>
+
+</body>
+</html>

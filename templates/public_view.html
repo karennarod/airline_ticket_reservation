@@ -35,7 +35,7 @@
 
 </style>
 <h1>Find a Flight</h1>
-
+<h3>Flights: </h3>
 <table>
     <th>Airline name</th>
     <th>Flight no.</th>
@@ -44,9 +44,9 @@
     <th>Arrival Date</th>
     <th>Arrival Time</th>
     <th>Departure Airport</th>
-    <th>Departure City</th>
+   <!-- <th>Departure City</th> -->
     <th>Arrival Airport</th>
-    <th>Arrival City</th>
+   <!-- <th>Arrival City</th> -->
 
 
 {% for line in data %}
@@ -58,9 +58,9 @@
         <td>{{line['arrival_date']}}</td>
         <td>{{line['arrival_time']}}</td>
         <td>{{line['departure_airport']}}</td>
-        <td>{{line['departure_city']}}</td>
+       <!-- <td>{{line['departure_city']}}</td> -->
         <td>{{line['arrival_airport']}}</td>
-        <td>{{line['arrival_city']}}</td>
+       <!-- <td>{{line['arrival_city']}}</td> -->
     </tr>
 {% endfor %}
 </table><br>
