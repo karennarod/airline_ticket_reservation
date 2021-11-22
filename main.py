@@ -15,9 +15,10 @@ wsgi_app = app.wsgi_app
 
 #configure MYSQL/connects to database
 conn = pymysql.connect(host = '127.0.0.1',
-					   #port = 3889,              I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
+					   #port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
 					   user = 'root',
-					   password = '',
+					   password = 'root',
+                       #password = ''
 					   db = 'ticket_booking', # insert database name here 
 					   charset = 'utf8mb4',
 					   cursorclass = pymysql.cursors.DictCursor)
