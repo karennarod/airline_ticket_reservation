@@ -135,7 +135,6 @@ def airline_logged():
     cursor = conn.cursor()
     print(request.form)
     if request.form.get('action') == 'login':
-        
         username = request.form.get('username')
         password = request.form.get('password')
         cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
@@ -152,7 +151,7 @@ def airline_logged():
     else:
         username = request.form.get('username')
         airline = request.form.get('airline')
-        password = request.form.get('password')
+        password = request.form.get('pw')
         fn = request.form.get('first_name')
         ln = request.form.get('last_name')
         dob = request.form.get('dob')
