@@ -17,8 +17,8 @@ wsgi_app = app.wsgi_app
 conn = pymysql.connect(host = '127.0.0.1',
 					   #port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
 					   user = 'root',
-					   password = 'root',
-                       #password = ''
+					   #password = 'root',
+                       password = '',
 					   db = 'ticket_booking', # insert database name here 
 					   charset = 'utf8mb4',
 					   cursorclass = pymysql.cursors.DictCursor)
@@ -76,19 +76,49 @@ def cust_login():
 
 @app.route('/customer_logged_in', methods = ["GET", "POST"])
 def cust_logged():
-    email = request.form.get('email')
-    password = request.form.get('password')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM customer WHERE email = %s", email)
-    existing_cust = cursor.fetchone()
-    if existing_cust:
-        cursor.execute("SELECT * FROM customer WHERE email = %s AND pw = md5(%s)", (email, password))
-        existing_cust = cursor.fetchall()
+    if 'login' in request.form:
+        email = request.form.get('email')
+        password = request.form.get('password')
+        cursor.execute("SELECT * FROM customer WHERE email = %s", email)
+        existing_cust = cursor.fetchone()
         if existing_cust:
-            cursor.close()
-            return render_template('customer_logged_in.html')
-    error = "No existing customer for that combination of info. Please try again or register."
-    return render_template('customer_login.html', error = error)
+            cursor.execute("SELECT * FROM customer WHERE email = %s AND pw = md5(%s)", (email, password))
+            existing_cust = cursor.fetchall()
+            if existing_cust:
+                cursor.close()
+                return render_template('customer_logged_in.html')
+        cursor.close()
+        error = "No existing customer for that combination of info. Please try again or register."
+        return render_template('customer_login.html', error = error)
+    else:
+        email = request.form.get('email')
+        password = request.form.get('password')
+        name = request.form.get('name')
+        building_num = request.form.get('building_num')
+        street = request.form.get('street')
+        city = request.form.get('city')
+        state = request.form.get('state')
+        phone = request.form.get('phone')
+        pp_num = request.form.get('pp_num')
+        pp_exp = request.form.get('pp_exp')
+        pp_country = request.form.get('pp_country')
+        dob = request.form.get('dob')
+        pw = request.form.get('pw')
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM customer WHERE email = %s", email)
+        existing_cust = cursor.fetchone()
+        if existing_cust:
+            #error
+            error = "yeah no"
+            return render_template('customer_login.html', error = error)
+        cursor.execute("SELECT md5(%s)", pw)
+        pw = cursor.fetchone()
+        cursor.execute("INSERT INTO customer VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
+         (email, name, building_num, street, city, state, phone, pp_num, pp_exp, pp_country, dob, pw))
+        cursor.close()
+        return render_template('customer_logged_in.html')
+        
 
 
 #

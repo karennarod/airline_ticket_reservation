@@ -5,10 +5,44 @@
 <form action = "/customer_logged_in" method = "POST">
     <input type = "email" name = "email" placeholder = "Email" required/> </br>
     <input type = "password" name = "password" placeholder = "Password" required/></br>
+    <input type = "hidden" name = "action" value = "login">
     <input type = "submit" value = "Login" /></br>
     {% if error %}
     <p class="error"><strong>Error:</strong> {{error}}</p>
     {% endif %}
+</form>
+<form action = "/customer_logged_in" method = "POST">
+    <!--
+    <input type = "email" name = "email" placeholder = "Email" /> </br>
+    <input type = "pw" name = "pw" placeholder = "Password" /></br>
+    <input type = "name" name = "name" placeholder = "First and Last Name" /></br>
+    <input type = "building_num" name = "building_num" placeholder = "Building/Home Number" /></br>
+    <input type = "street" name = "street" placeholder = "Home Street" /></br>
+    <input type = "city" name = "city" placeholder = "Home City" /></br>
+    <input type = "state" name = "state" placeholder = "Home State" /></br>
+    <input type = "phone" name = "phone" placeholder = "Phone number" /></br>
+    <input type = "pp_num" name = "pp_num" placeholder = "Passport Number" /></br>
+    <input type = "pp_exp" name = "pp_exp" placeholder = "Passport Expiration Date" /></br>
+    <input type = "pp_country" name = "pp_country" placeholder = "Passport Country" /></br>
+    <input type = "dob" name = "dob" placeholder = "Date of Birth" /></br>
+    <input type = "hidden" name = "action" value = "login">
+    <input type = "submit" value = "REGISTER" /></br>
+    -->
+
+    <input type = "email" name = "email" placeholder = "Email" required/> </br>
+    <input type = "pw" name = "pw" placeholder = "Password" required/></br>
+    <input type = "name" name = "name" placeholder = "First and Last Name" required/></br>
+    <input type = "building_num" name = "building_num" placeholder = "Building/Home Number" required/></br>
+    <input type = "street" name = "street" placeholder = "Home Street" required/></br>
+    <input type = "city" name = "city" placeholder = "Home City" required/></br>
+    <input type = "state" name = "state" placeholder = "Home State" required/></br>
+    <input type = "phone" name = "phone" placeholder = "Phone number" required/></br>
+    <input type = "pp_num" name = "pp_num" placeholder = "Passport Number" required/></br>
+    <input type = "pp_exp" name = "pp_exp" placeholder = "Passport Expiration Date" required/></br>
+    <input type = "pp_country" name = "pp_country" placeholder = "Passport Country" required/></br>
+    <input type = "dob" name = "dob" placeholder = "Date of Birth" required/></br>
+    <input type = "hidden" name = "action" value = "login">
+    <input type = "submit" value = "REGISTER" /></br>
 </form>
 </body>
 </html>
