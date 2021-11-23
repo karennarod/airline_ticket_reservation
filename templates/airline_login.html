@@ -5,10 +5,21 @@
 <form action = "/airline_logged_in" method = "POST">
     <input type = "username" name = "username" placeholder = "Username" required/> </br>
     <input type = "password" name = "password" placeholder = "Password" required/></br>
-    <input type = "submit" value = "Login" /></br>
+    <input type = "hidden" name = "action" value = "login">
+    <input type = "submit" value = "LOGIN" /></br>
     {% if error %}
     <p class="error"><strong>Error:</strong> {{error}}</p>
     {% endif %}
+</form>
+<form action = "/airline_logged_in" method = "POST">
+    <input type = "username" name = "username" placeholder = "Username" required/> </br>
+    <input type = "pw" name = "pw" placeholder = "Password" required/></br>
+    <input type = "airline" name = "airline" placeholder = "Name of Airline" required/></br>
+    <input type = "first_name" name = "first_name" placeholder = "First Name" required/></br>
+    <input type = "last_name" name = "last_name" placeholder = "Last Name" required/></br>
+    <input type = "dob" name = "dob" placeholder = "Date of Birth" required/></br>
+    <input type = "hidden" name = "action" value = "register">
+    <input type = "submit" value = "REGISTER" /></br>
 </form>
 </body>
 </html>

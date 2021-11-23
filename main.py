@@ -77,7 +77,7 @@ def cust_login():
 @app.route('/customer_logged_in', methods = ["GET", "POST"])
 def cust_logged():
     cursor = conn.cursor()
-    if 'login' in request.form:
+    if request.form.get('action') == 'login':
         email = request.form.get('email')
         password = request.form.get('password')
         cursor.execute("SELECT * FROM customer WHERE email = %s", email)
@@ -93,14 +93,13 @@ def cust_logged():
         return render_template('customer_login.html', error = error)
     else:
         email = request.form.get('email')
-        password = request.form.get('password')
         name = request.form.get('name')
-        building_num = request.form.get('building_num')
+        building_num = int(request.form.get('building_num'))
         street = request.form.get('street')
         city = request.form.get('city')
         state = request.form.get('state')
-        phone = request.form.get('phone')
-        pp_num = request.form.get('pp_num')
+        phone = int(request.form.get('phone'))
+        pp_num = int(request.form.get('pp_num'))
         pp_exp = request.form.get('pp_exp')
         pp_country = request.form.get('pp_country')
         dob = request.form.get('dob')
@@ -110,11 +109,12 @@ def cust_logged():
         existing_cust = cursor.fetchone()
         if existing_cust:
             #error
-            error = "yeah no"
+            error = "There is already a customer with that email. Try a different email."
+            cursor.close()
             return render_template('customer_login.html', error = error)
         cursor.execute("SELECT md5(%s)", pw)
-        pw = cursor.fetchone()
-        cursor.execute("INSERT INTO customer VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",
+        pw = list(cursor.fetchone().values())[0]
+        cursor.execute("INSERT INTO customer VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
          (email, name, building_num, street, city, state, phone, pp_num, pp_exp, pp_country, dob, pw))
         cursor.close()
         return render_template('customer_logged_in.html')
@@ -132,20 +132,41 @@ def airline_login():
 
 @app.route('/airline_logged_in', methods = ["GET", "POST"])
 def airline_logged():
-    username = request.form.get('username')
-    password = request.form.get('password')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
-    existing_staff = cursor.fetchone()
-    if existing_staff:
-        print("EMAIL AND PASSWORD: ", username, password)
-        cursor.execute("SELECT * FROM airline_staff WHERE username = %s AND password = md5(%s)", (username, password))
-        existing_staff = cursor.fetchall()
+    print(request.form)
+    if request.form.get('action') == 'login':
+        
+        username = request.form.get('username')
+        password = request.form.get('password')
+        cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
+        existing_staff = cursor.fetchone()
+        if existing_staff:
+            print("EMAIL AND PASSWORD: ", username, password)
+            cursor.execute("SELECT * FROM airline_staff WHERE username = %s AND password = md5(%s)", (username, password))
+            existing_staff = cursor.fetchone()
+            if existing_staff:
+                cursor.close()
+                return render_template('airline_logged_in.html')
+        error = "No existing staff for that combination of info. Please try again or register."
+        return render_template('airline_login.html', error = error)
+    else:
+        username = request.form.get('username')
+        airline = request.form.get('airline')
+        password = request.form.get('password')
+        fn = request.form.get('first_name')
+        ln = request.form.get('last_name')
+        dob = request.form.get('dob')
+        cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
+        existing_staff = cursor.fetchone()
         if existing_staff:
             cursor.close()
-            return render_template('airline_logged_in.html')
-    error = "No existing staff for that combination of info. Please try again or register."
-    return render_template('airline_login.html', error = error)
+            error = "There is already a staff member with that username. Try using a different username."
+            return render_template('airline_login.html', error = error)
+        cursor.execute("SELECT md5(%s)", password)
+        password = list(cursor.fetchone().values())[0]
+        cursor.execute("INSERT INTO airline_staff VALUES (%s, %s, %s, %s, %s, %s)", (username, airline, password, fn, ln, dob))
+        cursor.close()
+        return render_template('airline_logged_in.html')
 
 if __name__ == "__main__": #for some reason, these 2 lines of code solved my 3 hour issue, so you can remove it if it doesn't work for you and I will add it back for me
 	app.run('127.0.0.1', 5000, debug = True)
