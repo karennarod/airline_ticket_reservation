@@ -87,6 +87,7 @@ def cust_logged():
             existing_cust = cursor.fetchall()
             if existing_cust:
                 cursor.close()
+                session['email'] = email
                 return render_template('customer_logged_in.html')
         cursor.close()
         error = "No existing customer for that combination of info. Please try again or register."
@@ -145,6 +146,7 @@ def airline_logged():
             existing_staff = cursor.fetchone()
             if existing_staff:
                 cursor.close()
+                session['username'] = username
                 return render_template('airline_logged_in.html')
         error = "No existing staff for that combination of info. Please try again or register."
         return render_template('airline_login.html', error = error)
@@ -167,5 +169,8 @@ def airline_logged():
         cursor.close()
         return render_template('airline_logged_in.html')
 
+
+
+app.secret_key = 'this is a key lol'
 if __name__ == "__main__": #for some reason, these 2 lines of code solved my 3 hour issue, so you can remove it if it doesn't work for you and I will add it back for me
 	app.run('127.0.0.1', 5000, debug = True)
