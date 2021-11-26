@@ -1,7 +1,44 @@
 <html>
 <head>
-    Airline login success!
+    <title>Welcome</title>
 </head>
 <body>
+    <style type="text/css">
+        h1, body{
+            font-family: Verdana;
+            font-style:  normal;
+        }
+        table{
+            border: 1px solid lightsteelblue;
+            font-family: Verdana;
+        }
+        th, td{
+            border: 1px solid lightsteelblue;
+            padding:  15px; 
+            text-align: left;
+        }
+        tr:not(:first-child):hover{
+            background-color: lightsteelblue;
+        }
+
+    </style>
+    <h1>Welcome!</h1>
+    <h2>Search through your flights</h2>
+     <form action = "/airline_view_flights" method = "POST">
+        Enter a range of departure dates:
+        <br>
+        <input type = "date" name = "first_departure_date" placeholder = "starting departure date"/>
+        <input type = "date" name = "second_departure_date" placeholder = "ending departure date"/><br>
+       <!-- <input type = "text" name = "departure_city" placeholder = "departure city" pattern = "{1,20}"/>
+        <input type = "text" name = "arrival_city" placeholder = "arrival city" pattern = "{1,20}"/></br> -->
+        <input type = "text" name = "departure_airport" placeholder = "departure airport" pattern = "{1,20}"/>
+        <input type = "text" name = "arrival_airport" placeholder = "arrival airport" pattern = "{1,20}"/></br>
+        <input type = "submit" value = "Search" /></br>
+    </form>
+
+
+    <h2>Register a Plane</h2>
+    <h2>Your Airline Stats</h2>
+
 </body>
 </html>
