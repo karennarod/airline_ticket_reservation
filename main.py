@@ -15,10 +15,10 @@ wsgi_app = app.wsgi_app
 
 #configure MYSQL/connects to database
 conn = pymysql.connect(host = '127.0.0.1',
-					   port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
+					   #port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
 					   user = 'root',
-					   password = 'root',
-                       #password = '',
+					   #password = 'root',
+                       password = '',
 					   db = 'ticket_booking', # insert database name here 
 					   charset = 'utf8mb4',
 					   cursorclass = pymysql.cursors.DictCursor)
@@ -213,7 +213,9 @@ def airline_logged():
                 return render_template('airline_logged_in.html')
         error = "No existing staff for that combination of info. Please try again or register."
         return render_template('airline_login.html', error = error)
-    else:
+
+
+    elif request.form.get('action') == 'register':
         username = request.form.get('username')
         airline = request.form.get('airline')
         password = request.form.get('pw')
@@ -221,7 +223,7 @@ def airline_logged():
         ln = request.form.get('last_name')
         dob = request.form.get('dob')
         cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
-        existing_staff = cursor.fetchone()
+        existing_staff = cursor.fetchall()
         if existing_staff:
             cursor.close()
             error = "There is already a staff member with that username. Try using a different username."
@@ -234,6 +236,139 @@ def airline_logged():
         cursor.close()
         print(cursor)
         return render_template('airline_logged_in.html')
+
+
+    elif request.form.get('action') == "register_plane":
+        cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
+        logged_in = cursor.fetchone()
+        if logged_in:
+            airplane_id = request.form.get('airplane_id')
+            num_seats = request.form.get('num_seats')
+            airline = logged_in['airline_name']
+            cursor.execute("SELECT * FROM airplane WHERE airline_name = %s AND airplane_id = %s", (airline, airplane_id))
+            existing_plane = cursor.fetchone()
+            if existing_plane:
+                cursor.close()
+                error = "There is already a plane with that ID and airline in the system. Please choose a new ID."
+                return render_template('airline_logged_in.html', error = error)
+            cursor.execute("INSERT INTO airplane VALUES (%s, %s, %s)", (airplane_id, airline, num_seats))
+            cursor.close()
+            error = "Sucessfully added a plane."
+            return render_template('airline_logged_in.html', error = error)
+        cursor.close()
+        error = "Airline staff not logged in. Please login and try again."
+        return render_template('airline_login.html', error = error)
+
+
+    elif request.form.get('action') == "new_flight":
+        #
+        # ADD CHECK FOR AIRPORT AND AIRPLANE AND ERROR PROBLEMS
+        #
+        cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
+        logged_in = cursor.fetchone()
+        if logged_in:
+            flight_num = request.form.get('flight_num')
+            dep_date = request.form.get('departure_date')
+            dep_time = request.form.get('departure_time')
+            base_price = request.form.get('base_price')
+            dep_airport = request.form.get('departure_airport')
+            arr_airport = request.form.get('arrival_airport')
+            arr_date = request.form.get('arrival_date')
+            arr_time = request.form.get('arrival_time')
+            airplane_id = request.form.get('airplane_id')
+            airline = logged_in['airline_name']
+            status = 'O'
+            tickets_sold = 0
+            cursor.execute("SELECT * FROM flight WHERE airline_name = %s AND departure_date = %s AND departure_time = %s", (airline, dep_date, dep_time))
+            existing_flight = cursor.fetchone()
+            if existing_flight:
+                cursor.close()
+                error = "There is already a flight with those details in the system. Please choose a new flight number, departure date, or departure time."
+                return render_template('airline_logged_in.html', error = error)
+            cursor.execute("INSERT INTO flight VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+                (flight_num, dep_date, dep_time, airline, base_price, dep_airport, arr_airport, arr_date, arr_time, airplane_id, status, tickets_sold))
+            cursor.close()
+            error = "Sucessfully added a plane."
+            return render_template('airline_logged_in.html', error = error)
+        cursor.close()
+        error = "Airline staff not logged in. Please login and try again."
+        return render_template('airline_login.html', error = error)
+
+
+    elif request.form.get("action") == "new_airport":
+        cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
+        logged_in = cursor.fetchone()
+        if logged_in:
+            code = request.form.get('code')
+            name = request.form.get('name')
+            city = request.form.get('city')
+            cursor.execute("SELECT * FROM airport WHERE airport_code = %s", code)
+            existing_airport = cursor.fetchall()
+            if existing_airport:
+                cursor.close()
+                error = "There is already an airport with that code. Please choose a new airport code."
+                return render_template('airline_logged_in.html', error = error)
+            if len(code) != 3:
+                cursor.close()
+                error = "Please choose an airport code that is exactly 3 characters long."
+                return render_template('airline_logged_in.html', error = error)
+            cursor.execute("INSERT INTO airport VALUES (%s, %s, %s)", (code, name, city))
+            cursor.close()
+            error = "Successfully added airport."
+            return render_template('airline_logged_in.html', error = error)
+        cursor.close()
+        error = "Airline staff not logged in. Please login and try again."
+        return render_template('airline_login.html', error = error)
+
+
+    elif request.form.get("action") == "new_airport":
+        cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
+        logged_in = cursor.fetchone()
+        if logged_in:
+            code = request.form.get('code')
+            name = request.form.get('name')
+            city = request.form.get('city')
+            cursor.execute("SELECT * FROM airport WHERE airport_code = %s", code)
+            existing_airport = cursor.fetchall()
+            if existing_airport:
+                cursor.close()
+                error = "There is already an airport with that code. Please choose a new airport code."
+                return render_template('airline_logged_in.html', error = error)
+            if len(code) != 3:
+                cursor.close()
+                error = "Please choose an airport code that is exactly 3 characters long."
+                return render_template('airline_logged_in.html', error = error)
+            cursor.execute("INSERT INTO airport VALUES (%s, %s, %s)", (code, name, city))
+            cursor.close()
+            error = "Successfully added airport."
+            return render_template('airline_logged_in.html', error = error)
+        cursor.close()
+        error = "Airline staff not logged in. Please login and try again."
+        return render_template('airline_login.html', error = error)
+
+    elif request.form.get("action") == "update_status":
+        cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
+        logged_in = cursor.fetchone()
+        if logged_in:
+            flight_num = request.form.get('flight_num')
+            dep_date = request.form.get('dep_date')
+            dep_time = request.form.get('dep_time')
+            airline = logged_in['airline_name']
+            status = request.form.get('status')
+            cursor.execute("SELECT * FROM flight WHERE flight_num = %s AND airline_name = %s AND departure_date = %s AND departure_time = %s", (flight_num, airline, dep_date, dep_time))
+            existing_flight = cursor.fetchall()
+            if existing_flight:
+                cursor.execute("UPDATE flight SET flight_status = %s WHERE flight_num = %s AND airline_name = %s AND departure_date = %s AND departure_time = %s", (status, flight_num, airline, dep_date, dep_time))
+                cursor.close()
+                error = "Successfully updated flight status."
+                return render_template('airline_logged_in.html', error = error)
+            cursor.close()
+            error = "No existing flight with those details. Unable to update."
+            return render_template('airline_logged_in.html', error = error)
+        cursor.close()
+        error = "Airline staff not logged in. Please login and try again."
+        return render_template('airline_login.html', error = error)
+
 
 
 @app.route('/airline_view_flights', methods = ["GET", "POST"])

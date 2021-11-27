@@ -23,6 +23,9 @@
 
     </style>
     <h1>Welcome!</h1>
+    {% if error %}
+    <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
     <h2>Search through your flights</h2>
      <form action = "/airline_view_flights" method = "POST">
         Enter a range of departure dates:
@@ -33,11 +36,53 @@
         <input type = "text" name = "arrival_city" placeholder = "arrival city" pattern = "{1,20}"/></br> 
         <input type = "text" name = "departure_airport" placeholder = "departure airport" pattern = "{1,20}"/>
         <input type = "text" name = "arrival_airport" placeholder = "arrival airport" pattern = "{1,20}"/></br>
+        <input type = "hidden" name = "action" value = "search_flights"/>
         <input type = "submit" value = "Search" /></br>
     </form>
 
 
     <h2>Register a Plane</h2>
+    <form action = "/airline_logged_in" method = "POST">
+        <input type = "airplane_id" name = "airplane_id" placeholder = "Airplane ID" required/>
+        <input type = "num_seats" name = "num_seats" placeholder = "Number of Seats on Airplane" required/>
+        <input type = "hidden" name = "action" value = "plane_registration"/>
+        <input type = "submit" value = "Register Plane"/>
+    </form>
+
+    <h2>Create a New Flight</h2>
+    <form action = "/airline_logged_in" method = "POST">
+        <input type = "flight_num" name = "flight_num" placeholder = "Flight Number" required/>
+        <input type = "date" name = "departure_date" placeholder = "Departure Date" required/>
+        <input type = "departure_time" name = "departure_time" placeholder = "Departure Time (HH:MM)" required/>
+        <input type = "base_price" name = "base_price" placeholder = "Base Ticket Price" required/>
+        <input type = "departure_airport" name = "departure_airport" placeholder = "Departure Airport" required/>
+        <input type = "arrival_airport" name = "arrival_airport" placeholder = "Arrival Airport" required/>
+        <input type = "date" name = "arrival_date" placeholder = "Arrival Date" required/>
+        <input type = "arrival_time" name = "arrival_time" placeholder = "Arrival Time (HH:MM)" required/>
+        <input type = "airplane_id" name = "airplane_id" placeholder = "Airplane ID" required/>
+        <input type = "hidden" name = "action" value = "new_flight"/>
+        <input type = "submit" value = "Create Flight"/>
+    </form>
+
+    <h2>Add an Airport</h2>
+    <form action = "/airline_logged_in" method = "POST">
+        <input type = "airport_code" name =  "code" placeholder = "Airport Code (3 characters)" required/>
+        <input type = "name" name = "name" placeholder = "Airport Name" required/>
+        <input type = "city" name = "city" placeholder = "Airport City" required/>
+        <input type = "hidden" name = "action" value = "new_airport"/>
+        <input type = "submit" value = "Add Airport"/>
+    </form>
+
+    <h2>Update Flight Status</h2>
+    <form action = "/airline_logged_in" method = "POST">
+        <input type = "flight_num" name = "flight_num" placeholder = "Flight Number" required/>
+        <input type = "date" name = "dep_date" placeholder = "departure date" required/>
+        <input type = "dep_time" name = "dep_time" placeholder = "Departure Time (HH:MM)" required/>
+        <input type = "status" name = "status" placeholder = "New Status" required/>
+        <input type = "hidden" name = "action" value = "update_status"/>
+        <input type = "submit" value = "Update Flight Status"/>
+    </form>
+
     <h2>Your Airline Stats</h2>
 
 </body>
