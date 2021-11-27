@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Your Flights </title>
+    <title>Find a Flight</title>
 </head>
 <body>
 <style type="text/css">
@@ -24,7 +24,7 @@
         }
 
     </style>
-<h1>Your Flights...</h1>
+<h1>Find a Flight...</h1>
 
 <table>
     <th>Airline name</th>
@@ -51,11 +51,10 @@
         <td>{{line['departure_city']}}</td> 
         <td>{{line['arrival_airport']}}</td> 
         <td>{{line['arrival_city']}}</td> 
-    </tr>
+     </tr>
+     
 {% endfor %} 
-</table><br>
-
-<br>
+</table>
 
 </body>
 </html>

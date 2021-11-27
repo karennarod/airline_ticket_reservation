@@ -30,16 +30,14 @@ def public_search():
 
 @app.route('/public_view', methods = ["GET", "POST"])
 def public_view(): 
-    #today = str(date.today())
-    #print(today)
 
-    query = "SELECT * FROM flight WHERE departure_date >= '2021-11-11'" #FIX
+    query = "SELECT * FROM available_tickets WHERE departure_date >= '2021-11-11'" #FIX
     
     queries = []
     departure_date = request.form.get('departure_date')
     arrival_date = request.form.get('arrival_date')
-    #departure_city = request.form.get('departure_city')
-    #arrival_city = request.form.get('arrival_city')
+    departure_city = request.form.get('departure_city')
+    arrival_city = request.form.get('arrival_city')
     departure_airport = request.form.get('departure_airport')
     arrival_airport = request.form.get('arrival_airport')
 
@@ -48,13 +46,15 @@ def public_view():
     if arrival_airport != '':
         queries.append("arrival_airport = '%s'" % arrival_airport)
     if departure_date != '':
-        queries.append("departure_date = '%s'" % departure_date) #REFORMAT
+        queries.append("departure_date = '%s'" % departure_date) 
     if arrival_date != '':
-        queries.append("arrival_date = '%s'" % arrival_date) #REFORMAT
+        queries.append("arrival_date = '%s'" % arrival_date) 
+    if departure_city != '':
+        queries.append("departure_city = '%s'" % departure_city)
+    if arrival_city != '':
+        queries.append("arrival_city = '%s'" % arrival_city)
     if queries:
         query += " AND " + " AND ".join(queries)
-    print(query) 
-
 
     #execute queries from database
     cursor = conn.cursor()
@@ -69,6 +69,24 @@ def public_view():
 # BEGIN CUSTOMER LOGIN
 #
 
+def isCustomer():
+    """
+    verifies if there is a customer with the current session's email
+    should be used to check whether the user is trying to inappropriately access a customer method
+    :return data: tuple of query result, can use "if VerifyCustomer():" to check whether or not it's empty.
+    EXAMPLE USE IN CUSTHOME() FUNCTION
+    """
+    
+    verify = "SELECT * FROM customer WHERE email = %s"
+    try:
+        cursor = conn.cursor()
+        cursor.execute(verify, session['email'])
+        data = cursor.fetchone()
+        cursor.close()
+        return len(data) > 0
+    except:
+        return False
+    return False
 
 @app.route('/customer_login', methods = ["GET", "POST"])
 def cust_login():
@@ -119,11 +137,54 @@ def cust_logged():
         pw = list(cursor.fetchone().values())[0]
         cursor.execute("INSERT INTO customer VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
          (email, name, building_num, street, city, state, phone, pp_num, pp_exp, pp_country, dob, pw))
-        print("i here")
         cursor.close()
         return render_template('customer_logged_in.html')
-        
 
+
+@app.route('/customer_view_flights', methods = ["GET", "POST"])
+def cust_view_all(): 
+    query = "SELECT * FROM available_tickets WHERE departure_date >= '2021-11-11'" 
+    queries = []
+    departure_date = request.form.get('departure_date')
+    arrival_date = request.form.get('arrival_date')
+    departure_city = request.form.get('departure_city')
+    arrival_city = request.form.get('arrival_city')
+    departure_airport = request.form.get('departure_airport')
+    arrival_airport = request.form.get('arrival_airport')
+
+    if departure_airport != '':
+        queries.append("departure_airport = '%s'" % departure_airport)
+    if arrival_airport != '':
+        queries.append("arrival_airport = '%s'" % arrival_airport)
+    if departure_date != '':
+        queries.append("departure_date = '%s'" % departure_date) 
+    if arrival_date != '':
+        queries.append("arrival_date = '%s'" % arrival_date) 
+    if departure_city != '':
+        queries.append("departure_city = '%s'" % departure_city)
+    if arrival_city != '':
+        queries.append("arrival_city = '%s'" % arrival_city)
+    if queries:
+        query += " AND " + " AND ".join(queries)
+    print(query) 
+
+    #execute queries from database
+    cursor = conn.cursor()
+    cursor.execute(query)
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('customer_view_flights.html', data = data)
+
+@app.route('/customer_my_flights', methods = ["GET", "POST"])
+def cust_my_flights(): 
+    if isCustomer(): 
+        query = "SELECT * FROM purchase_info natural join ticket natural join available_tickets WHERE airline_name = airline_name " \
+                    "AND purchase_info.customer_email = %s"
+        cursor = conn.cursor()
+        cursor.execute(query, session['email'])
+        data = cursor.fetchall()
+        cursor.close()
+        return render_template('customer_my_flights.html', data=data)
 
 #
 # BEGIN AIRLINE STAFF LOGIN
@@ -182,8 +243,8 @@ def airline_view():
     queries = []
     departure_date = request.form.get('departure_date')
     arrival_date = request.form.get('arrival_date')
-    #departure_city = request.form.get('departure_city')
-    #arrival_city = request.form.get('arrival_city')
+    departure_city = request.form.get('departure_city')
+    arrival_city = request.form.get('arrival_city')
     departure_airport = request.form.get('departure_airport')
     arrival_airport = request.form.get('arrival_airport')
 
@@ -192,9 +253,13 @@ def airline_view():
     if arrival_airport != '':
         queries.append("arrival_airport = '%s'" % arrival_airport)
     if departure_date != '':
-        queries.append("departure_date = '%s'" % departure_date) #REFORMAT
+        queries.append("departure_date = '%s'" % departure_date) 
     if arrival_date != '':
-        queries.append("arrival_date = '%s'" % arrival_date) #REFORMAT
+        queries.append("arrival_date = '%s'" % arrival_date) 
+    if departure_city != '':
+        queries.append("departure_city = '%s'" % departure_city)
+    if arrival_city != '':
+        queries.append("arrival_city = '%s'" % arrival_city)
     if queries:
         query += " AND " + " AND ".join(queries)
     print(query) 
@@ -204,7 +269,6 @@ def airline_view():
     cursor = conn.cursor()
     cursor.execute(query)
     data = cursor.fetchall()
-    
     cursor.close()
     return render_template('airline_view_flights.html', data=data)
 

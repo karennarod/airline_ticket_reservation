@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Flights</title>
+</head>
+<body>
+
+<style>
+	h1, body{
+	    font-family: Verdana;
+	    font-style:  normal;
+	}
+	table{
+	    border: 1px solid lightsteelblue;
+	    font-family: Verdana;
+	}
+	th, td{
+	    border: 1px solid lightsteelblue;
+	    padding:  15px; 
+	    text-align: left;
+	}
+	tr:not(:first-child):hover{
+	    background-color: lightsteelblue;
+	}
+</style>
+
+<h2>Your flights...</h2>
+<table>
+	<th>Airline name</th>
+	<th>Flight no.</th>
+	<th>Departure Date</th>
+	<th>Departure Time</th>
+	<th>Arrival Date</th>
+	<th>Arrival Time</th>
+	<th>Departure Airport</th>
+	<th>Departure City</th>
+	<th>Arrival Airport</th>
+	<th>Arrival City</th>
+
+{% for line in data %}
+	<tr>
+		<td>{{line['airline_name']}}</td>
+		<td>{{line['flight_num']}}</td>
+		<td>{{line['departure_date']}}</td>
+		<td>{{line['departure_time']}}</td>
+		<td>{{line['arrival_date']}}</td>
+		<td>{{line['arrival_time']}}</td>
+		<td>{{line['departure_airport']}}</td>
+		<td>{{line['departure_city']}}</td>
+    <td>{{line['arrival_airport']}}</td>
+		<td>{{line['arrival_city']}}</td>
+	</tr>
+{% endfor %}
+</table>
+
+</body>
+</html>
