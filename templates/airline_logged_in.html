@@ -83,6 +83,16 @@
         <input type = "submit" value = "Update Flight Status"/>
     </form>
 
+    <h2>View Ratings</h2>
+    To see average rating for all flights, leave the fields empty. To see comments and ratings from each customer, enter flight details below.
+    <form action = "/airline_logged_in" method = "POST">
+        <input type = "flight_num" name = "flight_num" placeholder = "Flight Number"/>
+        <input type = "date" name = "dep_date" placeholder = "departure date"/>
+        <input type = "dep_time" name = "dep_time" placeholder = "Departure Time (HH:MM)"/>
+        <input type = "hidden" name = "action" value = "see_ratings"/>
+        <input type = "submit" value = "View Ratings"/>
+    </form>
+
     <h2>Your Airline Stats</h2>
 
 </body>

@@ -368,6 +368,24 @@ def airline_logged():
         cursor.close()
         error = "Airline staff not logged in. Please login and try again."
         return render_template('airline_login.html', error = error)
+    elif request.form.get("action") == "see_ratings":
+        cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
+        logged_in = cursor.fetchone()
+        if logged_in:
+            flight_num = request.form.get('flight_num')
+            dep_date = request.form.get('dep_date')
+            dep_time = request.form.get('dep_time')
+            airline = logged_in['airline_name']
+            if flight_num != None and dep_date != None and dep_time != None:
+                cursor.execute("SELECT flight_num, departure_date, departure_time, AVG(rating) FROM rating WHERE flight_num = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s",
+                (flight_num, dep_date, dep_time, airline))
+                data = cursor.fetchall()
+                cursor.close()
+                #remember to add rendering template and html formatting
+            cursor.execute("SELECT flight_num, departure_date, departure_time, AVG(rating) FROM rating WHERE airline_name = %s GROUP BY flight_num, departure_date, departure_time", (airline))
+            data = cursor.fetchall()
+            cusor.close()
+            #remember to add rendering template and html formatting
 
 
 
