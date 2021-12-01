@@ -134,6 +134,41 @@
         </tr>
     {% endfor %}
     </table><br>
+    <h3>10 Most Frequent Customers</h3>
+    <table>
+        <td>Customer Email</td>
+        <th>Number of Flights</th>
+
+
+    {% for line in data3 %}
+        <tr>
+            <td>{{line['email']}}</td>
+            <td>{{line['flights_taken']}}</td>
+        </tr>
+    {% endfor %}
+    </table><br>
+    <form action = "/airline_logged_in" method = "POST">
+        <input type = "cust_email" name = "cust_email" placeholder = "Customer Email" required/>
+        <input type = "hidden" name = "action" value = "cust_flights"/>
+        <input type = "submit" value = "Find Customer Flights"/>
+    </form>
+    {% if data4 %}
+        <h4>Flights Taken By Customer</h4>
+        <table>
+            <td>Customer Email</td>
+            <td>Flight Number</td>
+            <td>Departure Date</td>
+            <td>Departure Time</td>
+        {% for line in data4 %}
+            <tr>
+                <td>{{line['email']}}</td>
+                <td>{{line['flight_num']}}</td>
+                <td>{{line['dep_date']}}</td>
+                <td>{{line['dep_time']}}</td>
+            </tr>
+        {% endfor %}
+        </table><br>
+    {% endif %}
 
 
 </body>

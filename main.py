@@ -200,46 +200,58 @@ def airline_login():
 @app.route('/airline_logged_in', methods = ["GET", "POST"])
 def airline_logged():
     cursor = conn.cursor()
-    if request.form.get('action') == 'login':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
-        existing_staff = cursor.fetchone()
-        if existing_staff:
-            cursor.execute("SELECT * FROM airline_staff WHERE username = %s AND password = md5(%s)", (username, password))
+    if request.form.get('action') == 'login' or request.form.get('action') == 'register':
+        if request.form.get('action') == 'login':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
             existing_staff = cursor.fetchone()
             if existing_staff:
-                cursor.close()
-                session['username'] = username
-                return render_template('airline_logged_in.html')
-        error = "No existing staff for that combination of info. Please try again or register."
-        return render_template('airline_login.html', error = error)
-
-
-    elif request.form.get('action') == 'register':
-        username = request.form.get('username')
-        airline = request.form.get('airline')
-        password = request.form.get('pw')
-        fn = request.form.get('first_name')
-        ln = request.form.get('last_name')
-        dob = request.form.get('dob')
-        cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
-        existing_staff = cursor.fetchall()
-        if existing_staff:
-            cursor.close()
-            error = "There is already a staff member with that username. Try using a different username."
+                cursor.execute("SELECT * FROM airline_staff WHERE username = %s AND password = md5(%s)", (username, password))
+                existing_staff = cursor.fetchone()
+                if existing_staff:
+                    cursor.close()
+                    session['username'] = username
+                    return render_template('airline_logged_in.html')
+            error = "No existing staff for that combination of info. Please try again or register."
             return render_template('airline_login.html', error = error)
-        cursor.execute("SELECT md5(%s)", password)
-        password = list(cursor.fetchone().values())[0]
 
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO airline_staff VALUES (%s, %s, %s, %s, %s, %s)", (username, airline, password, fn, ln, dob))
+
+        elif request.form.get('action') == 'register':
+            username = request.form.get('username')
+            airline = request.form.get('airline')
+            password = request.form.get('pw')
+            fn = request.form.get('first_name')
+            ln = request.form.get('last_name')
+            dob = request.form.get('dob')
+            cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
+            existing_staff = cursor.fetchall()
+            if existing_staff:
+                cursor.close()
+                error = "There is already a staff member with that username. Try using a different username."
+                return render_template('airline_login.html', error = error)
+            cursor.execute("SELECT md5(%s)", password)
+            password = list(cursor.fetchone().values())[0]
+
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO airline_staff VALUES (%s, %s, %s, %s, %s, %s)", (username, airline, password, fn, ln, dob))
+            cursor.close()
+            session['username'] = username
+            return render_template('airline_logged_in.html')
+
+    cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
+    logged_in = cursor.fetchone()
+    if not logged_in:
         cursor.close()
-        session['username'] = username
-        return render_template('airline_logged_in.html')
+        error = "Airline staff not logged in. Please login and try again."
+        return render_template('airline_login.html', error = error)
+    
+    airline = logged_in['airline_name']
+    cursor.execute("SELECT customer_email as email, flights_taken FROM (SELECT *, COUNT(UNIQUE ticket_id) as flights_taken FROM purchase_info NATURAL JOIN ticket WHERE airline_name = %s GROUP BY customer_email) as countflights ORDER BY flights_taken LIMIT 3", airline)
+    data3 = cursor.fetchall()
 
 
-    elif request.form.get('action') == "register_plane":
+    if request.form.get('action') == "register_plane":
         cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
         logged_in = cursor.fetchone()
         if logged_in:
@@ -417,7 +429,7 @@ def airline_logged():
             print(session.get('display_destinations'))
             if session['display_destinations'] == 3:
                 session['display_destinations'] = 1
-                cursor.execute(" SELECT arrival_airport as airport_code, tickets_sold FROM ( SELECT *, SUM(tickets_booked) as tickets_sold FROM flight WHERE airline_name = %s AND departure_date > (SELECT DATE_SUB(CURDATE(), INTERVAL 1 YEAR)) GROUP BY airline_name, arrival_airport ORDER BY tickets_sold) AS finders LIMIT 3", airline)
+                cursor.execute("SELECT arrival_airport as airport_code, tickets_sold FROM ( SELECT *, SUM(tickets_booked) as tickets_sold FROM flight WHERE airline_name = %s AND departure_date > (SELECT DATE_SUB(CURDATE(), INTERVAL 1 YEAR)) GROUP BY airline_name, arrival_airport ORDER BY tickets_sold) AS finders LIMIT 3", airline)
                 data2 = cursor.fetchall()
                 cursor.close()
                 return render_template('airline_logged_in.html', data2 = data2)
@@ -427,6 +439,15 @@ def airline_logged():
             cursor.close()
             return render_template('airline_logged_in.html', data2 = data2)
 
+    elif request.form.get("action") == "cust_flights":
+        cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
+        logged_in = cursor.fetchone()
+        if logged_in:
+            airline = logged_in['airline_name']
+            email = request.form.get('cust_email')
+            cursor.execute("SELECT customer_email as email, flight_num, departure_date as dep_date, departure_time as dep_time FROM purchase_info NATURAL JOIN ticket WHERE airline_name = %s AND customer_email = %s", (airline, email))
+            data4 = cursor.fetchall()
+            return render_template('airline_logged_in.html', data4 = data4, data3 = data3)
 
     else:
         return render_template('public_search.html') # in case someone just tries to access this html page
