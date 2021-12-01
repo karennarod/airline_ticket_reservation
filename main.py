@@ -26,6 +26,8 @@ conn = pymysql.connect(host = '127.0.0.1',
 #PUBLIC VIEW
 @app.route('/')
 def public_search(): 
+    session.clear()
+    session['display_destinations'] = 3
     return render_template("public_search.html")
 
 @app.route('/public_view', methods = ["GET", "POST"])
@@ -234,7 +236,7 @@ def airline_logged():
         cursor = conn.cursor()
         cursor.execute("INSERT INTO airline_staff VALUES (%s, %s, %s, %s, %s, %s)", (username, airline, password, fn, ln, dob))
         cursor.close()
-        print(cursor)
+        session['username'] = username
         return render_template('airline_logged_in.html')
 
 
@@ -261,9 +263,6 @@ def airline_logged():
 
 
     elif request.form.get('action') == "new_flight":
-        #
-        # ADD CHECK FOR AIRPORT AND AIRPLANE AND ERROR PROBLEMS
-        #
         cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
         logged_in = cursor.fetchone()
         if logged_in:
@@ -279,6 +278,24 @@ def airline_logged():
             airline = logged_in['airline_name']
             status = 'O'
             tickets_sold = 0
+            cursor.execute("SELECT * FROM airplane WHERE airplane_id = %s AND airline_name = %s", (airplane_id, airline))
+            ex_airplane = cursor.fetchall()
+            if not ex_airplane:
+                cursor.close()
+                error = "There is no existing plane within your airline with that airplane ID. Please enter a valid airplane ID."
+                return render_template('airline_logged_in.html', error = error)
+            cursor.execute("SELECT * FROM airport WHERE airport_code = %s", dep_airport)
+            ex_airport = cursor.fetchall()
+            if not ex_airport:
+                cursor.close()
+                error = "There is no existing airport with that code for departure. Please enter a valid airport code."
+                return render_template('airline_logged_in.html', error = error)
+            cursor.execute("SELECT * FROM airport WHERE airport_code = %s", arr_airport)
+            ex_airport = cursor.fetchall()
+            if not ex_airport:
+                cursor.close()
+                error = "There is no existing airport with that code for arrival. Please enter a valid airport code."
+                return render_template('airline_logged_in.html', error = error)
             cursor.execute("SELECT * FROM flight WHERE airline_name = %s AND departure_date = %s AND departure_time = %s", (airline, dep_date, dep_time))
             existing_flight = cursor.fetchone()
             if existing_flight:
@@ -288,7 +305,7 @@ def airline_logged():
             cursor.execute("INSERT INTO flight VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
                 (flight_num, dep_date, dep_time, airline, base_price, dep_airport, arr_airport, arr_date, arr_time, airplane_id, status, tickets_sold))
             cursor.close()
-            error = "Sucessfully added a plane."
+            error = "Sucessfully added a flight."
             return render_template('airline_logged_in.html', error = error)
         cursor.close()
         error = "Airline staff not logged in. Please login and try again."
@@ -368,6 +385,7 @@ def airline_logged():
         cursor.close()
         error = "Airline staff not logged in. Please login and try again."
         return render_template('airline_login.html', error = error)
+
     elif request.form.get("action") == "see_ratings":
         cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
         logged_in = cursor.fetchone()
@@ -376,16 +394,45 @@ def airline_logged():
             dep_date = request.form.get('dep_date')
             dep_time = request.form.get('dep_time')
             airline = logged_in['airline_name']
-            if flight_num != None and dep_date != None and dep_time != None:
-                cursor.execute("SELECT flight_num, departure_date, departure_time, AVG(rating) FROM rating WHERE flight_num = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s",
+            if flight_num != 'See all flights': #flight_num == "" and dep_date == "" and dep_time == "":
+                flight_num = int(flight_num)
+                print(flight_num)
+                print(dep_date)
+                print(dep_time)
+                cursor.execute("SELECT email, flight_num, departure_date, departure_time, rate, comment FROM rating WHERE flight_num = %s AND departure_date = %s AND departure_time = %s AND airline_name = %s",
                 (flight_num, dep_date, dep_time, airline))
                 data = cursor.fetchall()
+                print(data)
                 cursor.close()
+                return render_template('airline_logged_in.html', data = data) #, data = data)
                 #remember to add rendering template and html formatting
-            cursor.execute("SELECT flight_num, departure_date, departure_time, AVG(rating) FROM rating WHERE airline_name = %s GROUP BY flight_num, departure_date, departure_time", (airline))
+            cursor.execute("SELECT null as email, flight_num, departure_date, departure_time, AVG(rate) as rate, null as comment FROM rating WHERE airline_name = %s GROUP BY flight_num, departure_date, departure_time ORDER BY departure_date, departure_time", (airline))
             data = cursor.fetchall()
-            cusor.close()
+            cursor.close()
+            return render_template('airline_logged_in.html', data = data)
             #remember to add rendering template and html formatting
+
+    elif request.form.get("action") == 'see_opposite':
+        cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
+        logged_in = cursor.fetchone()
+        if logged_in:
+            airline = logged_in['airline_name']
+            print(session.get('display_destinations'))
+            if session['display_destinations'] == 3:
+                session['display_destinations'] = 1
+                cursor.execute(" SELECT arrival_airport as airport_code, tickets_sold FROM ( SELECT *, SUM(tickets_booked) as tickets_sold FROM flight WHERE airline_name = %s AND departure_date > (SELECT DATE_SUB(CURDATE(), INTERVAL 1 YEAR)) GROUP BY airline_name, arrival_airport ORDER BY tickets_sold) AS finders LIMIT 3", airline)
+                data2 = cursor.fetchall()
+                cursor.close()
+                return render_template('airline_logged_in.html', data2 = data2)
+            session['display_destinations'] = 3
+            cursor.execute("SELECT arrival_airport as airport_code, tickets_sold FROM (SELECT *, SUM(tickets_booked) as tickets_sold FROM flight WHERE airline_name = %s AND departure_date > (SELECT DATE_SUB(CURDATE(), INTERVAL 3 MONTH)) GROUP BY airline_name, arrival_airport ORDER BY tickets_sold) AS finders LIMIT 3", airline)
+            data2 = cursor.fetchall()
+            cursor.close()
+            return render_template('airline_logged_in.html', data2 = data2)
+
+
+    else:
+        return render_template('public_search.html') # in case someone just tries to access this html page
 
 
 
