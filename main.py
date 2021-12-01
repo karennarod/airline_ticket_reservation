@@ -206,7 +206,6 @@ def airline_logged():
         cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
         existing_staff = cursor.fetchone()
         if existing_staff:
-            #print("EMAIL AND PASSWORD: ", username, password)
             cursor.execute("SELECT * FROM airline_staff WHERE username = %s AND password = md5(%s)", (username, password))
             existing_staff = cursor.fetchone()
             if existing_staff:
@@ -394,7 +393,7 @@ def airline_logged():
             dep_date = request.form.get('dep_date')
             dep_time = request.form.get('dep_time')
             airline = logged_in['airline_name']
-            if flight_num != 'See all flights': #flight_num == "" and dep_date == "" and dep_time == "":
+            if flight_num != 'See all flights':
                 flight_num = int(flight_num)
                 print(flight_num)
                 print(dep_date)
@@ -404,15 +403,13 @@ def airline_logged():
                 data = cursor.fetchall()
                 print(data)
                 cursor.close()
-                return render_template('airline_logged_in.html', data = data) #, data = data)
-                #remember to add rendering template and html formatting
+                return render_template('airline_logged_in.html', data = data)
             cursor.execute("SELECT null as email, flight_num, departure_date, departure_time, AVG(rate) as rate, null as comment FROM rating WHERE airline_name = %s GROUP BY flight_num, departure_date, departure_time ORDER BY departure_date, departure_time", (airline))
             data = cursor.fetchall()
             cursor.close()
             return render_template('airline_logged_in.html', data = data)
-            #remember to add rendering template and html formatting
 
-    elif request.form.get("action") == 'see_opposite':
+    elif request.form.get("action") == 'see_opposite': #seems to be working but data set is small
         cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
         logged_in = cursor.fetchone()
         if logged_in:
