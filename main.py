@@ -1,7 +1,3 @@
-#get to the correct directory
-#source venv/bin/activate
-#export FLASK_APP=main.py
-#flask run
 
 from flask import Flask, render_template, request, redirect, session
 import pymysql
@@ -456,7 +452,7 @@ def airline_logged():
 
 @app.route('/airline_view_flights', methods = ["GET", "POST"])
 def airline_view(): 
-    query = "SELECT * FROM flight WHERE departure_date >= '2021-11-11'" #FIX
+    query = "SELECT * FROM available_tickets WHERE departure_date >= '2021-11-11'" 
     
     queries = []
     departure_date = request.form.get('departure_date')
