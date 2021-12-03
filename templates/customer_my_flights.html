@@ -24,8 +24,37 @@
 	    background-color: lightsteelblue;
 	}
 </style>
+<h2>Your Future Flights</h2>
+<table>
+	<th>Airline name</th>
+	<th>Flight no.</th>
+	<th>Departure Date</th>
+	<th>Departure Time</th>
+	<th>Arrival Date</th>
+	<th>Arrival Time</th>
+	<th>Departure Airport</th>
+	<th>Departure City</th>
+	<th>Arrival Airport</th>
+	<th>Arrival City</th>
 
-<h2>Your flights...</h2>
+{% for line in data1 %}
+	<tr>
+		<td>{{line['airline_name']}}</td>
+		<td>{{line['flight_num']}}</td>
+		<td>{{line['departure_date']}}</td>
+		<td>{{line['departure_time']}}</td>
+		<td>{{line['arrival_date']}}</td>
+		<td>{{line['arrival_time']}}</td>
+		<td>{{line['departure_airport']}}</td>
+		<td>{{line['departure_city']}}</td>
+    	<td>{{line['arrival_airport']}}</td>
+		<td>{{line['arrival_city']}}</td>
+	</tr>
+{% endfor %}
+</table>
+<br>
+
+<h2>Your Previous Flights.</h2>
 <table>
 	<th>Airline name</th>
 	<th>Flight no.</th>
@@ -48,11 +77,23 @@
 		<td>{{line['arrival_time']}}</td>
 		<td>{{line['departure_airport']}}</td>
 		<td>{{line['departure_city']}}</td>
-    <td>{{line['arrival_airport']}}</td>
+    	<td>{{line['arrival_airport']}}</td>
 		<td>{{line['arrival_city']}}</td>
 	</tr>
 {% endfor %}
 </table>
+<br>
+<h2>Rate a Past Flight</h2>
+You can only rate flights you have not already rated
+    <form action = "/customer_my_flights" method = "POST">
+		<input type = "text" required name = "flight_num" placeholder = "flight number" pattern = "{6}"/><br>
+        <input type = "text" required name = "airline_name" placeholder = "airline name" pattern = "{1,20}"/><br>
+        <label for="rating">Your Rating:</label>
+		<input type = "number" id="rating" required name = "rating" placeholder = "rating" max="10" min="1"/><br>
+        <input type = "text" required name = "comment" placeholder = "Additional Comments" size="250" pattern = "{1,300}"/>
+		<br>
+        <input type = "submit" value = "Submit"/><br>
+    </form>
 
 </body>
 </html>

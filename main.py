@@ -202,13 +202,22 @@ def cust_my_flights():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM customer WHERE email = %s", session['email'])
     logged_in = cursor.fetchone()
-    query = "SELECT * FROM purchase_info natural join ticket natural join available_tickets WHERE airline_name = airline_name " \
-                "AND purchase_info.customer_email = %s"
-    cursor = conn.cursor()
-    cursor.execute(query, session['email'])
-    data = cursor.fetchall()
-    cursor.close()
-    return render_template('customer_my_flights.html', data=data)
+    if logged_in: 
+        query = "SELECT * FROM purchase_info natural join ticket natural join available_tickets WHERE airline_name = airline_name " \
+                    "AND purchase_info.customer_email = %s AND departure_date < CURDATE()"
+        cursor = conn.cursor()
+        cursor.execute(query, session['email'])
+        data = cursor.fetchall()
+
+
+        query = "SELECT * FROM purchase_info natural join ticket natural join available_tickets WHERE airline_name = airline_name " \
+                    "AND purchase_info.customer_email = %s AND departure_date >= CURDATE()"
+        cursor = conn.cursor()
+        cursor.execute(query, session['email'])
+        data1 = cursor.fetchall()
+
+        cursor.close()
+        return render_template('customer_my_flights.html', data=data, data1=data1)
 
 
 
@@ -563,7 +572,6 @@ def airline_view():
             data6 = cursor.fetchall()
             print(data6)
             cursor.close()
-
 
             return render_template('airline_view_flights.html', data=data, data6 = data6)
         else:
