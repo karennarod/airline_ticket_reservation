@@ -53,6 +53,25 @@
 {% endfor %} 
 </table><br>
 
+<h3>Search for All Customers on a Flight</h3>
+    <form action="/airline_view_flights", method='POST|GET'>
+        <input type = "text" name = "flight_num" placeholder = "Flight no." required/>
+        <input type = "hidden" name = "action" value = "search_cust"/>
+        <input type = "submit" value = "Search"/><br>
+    </form>
+  <br>
+    <table>
+        <td>Flight No.</td>
+        <td>Customers</td>
+  
+    {% for line in data6 %}
+        <tr>
+            <td>{{line['flight_num']}}</td>
+            <td>{{line['card_name']}}</td>
+        </tr>
+    {% endfor %}
+
+    </table><br>
 <br>
 
 </body>

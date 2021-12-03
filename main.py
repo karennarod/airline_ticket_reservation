@@ -518,7 +518,6 @@ def airline_logged():
     else:
         return render_template('public_search.html') # in case someone just tries to access this html page
 
-#FIX LATER
 @app.route('/airline_view_flights', methods = ["GET", "POST"])
 def airline_view(): 
     cursor = conn.cursor()
@@ -550,19 +549,29 @@ def airline_view():
             queries.append("arr_port.city = '%s'" % arrival_city)
 
         query = query + " AND " + " AND ".join(queries) if queries else query
-        print(query)
         #execute queries from database
         cursor = conn.cursor()
-
-
         cursor.execute(query.format(first_dep_date, second_dep_date), airline)
         data = cursor.fetchall()
-        print(data)
-        cursor.close()
-        return render_template('airline_view_flights.html', data=data)
 
-    else:
-        return render_template('public_search.html')
+        while(request.form.get('action') != "search_cust"):
+            airline = logged_in['airline_name']
+            flight_num = str(request.args.get('flight_num'))
+            print(flight_num)
+            cursor.execute("SELECT flight_num, card_name FROM purchase_info join ticket WHERE purchase_info.ticket_id = ticket.ticket_id AND flight_num = %s and airline_name = %s", (flight_num, airline))
+            print("SELECT card_name FROM purchase_info join ticket WHERE purchase_info.ticket_id = ticket.ticket_id AND flight_num = %s and airline_name = %s", (flight_num, airline))
+            data6 = cursor.fetchall()
+            print(data6)
+            cursor.close()
+
+
+            return render_template('airline_view_flights.html', data=data, data6 = data6)
+        else:
+            return render_template('public_search.html')
+
+ 
+        
+    
 
 
 
