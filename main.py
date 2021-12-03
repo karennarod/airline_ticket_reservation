@@ -203,24 +203,23 @@ def cust_my_flights():
     cursor.execute("SELECT * FROM customer WHERE email = %s", session['email'])
     logged_in = cursor.fetchone()
     if logged_in: 
+        #PREV
         query = "SELECT * FROM purchase_info natural join ticket natural join available_tickets WHERE airline_name = airline_name " \
                     "AND purchase_info.customer_email = %s AND departure_date < CURDATE()"
         cursor = conn.cursor()
         cursor.execute(query, session['email'])
         data = cursor.fetchall()
 
-
+        #FUTURE
         query = "SELECT * FROM purchase_info natural join ticket natural join available_tickets WHERE airline_name = airline_name " \
                     "AND purchase_info.customer_email = %s AND departure_date >= CURDATE()"
         cursor = conn.cursor()
         cursor.execute(query, session['email'])
         data1 = cursor.fetchall()
 
+
         cursor.close()
-        return render_template('customer_my_flights.html', data=data, data1=data1)
-
-
-
+        return render_template('customer_my_flights.html', data=data, data1=data1) 
 
 
 
