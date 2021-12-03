@@ -37,9 +37,19 @@
 
     <a href = "/customer_my_flights"><h2>View Your Flights</h2></a>
 
-    <h2>Rate a past flight</h2>
+    <h2>Rate a Past Flight</h2>
 
     <h2>Your Spending</h2>
+    <img src="assets/cust_spending.png">
+    <br>
+    Update your graph:
+    <form action="/customer_logged_in" method="POST">
+        <input type = "date" name = "start_date" placeholder = "start date"/>
+        <input type = "date" name = "end_date" placeholder = "end date"/>
+        <input type = "hidden" name = "action" value = "update_graph"/>
+        <input type = "submit" value = "Update" /><br>
+    </form>
+
 
 </body>
 </html>
