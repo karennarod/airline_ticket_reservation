@@ -194,8 +194,17 @@ def cust_view_all():
         cursor = conn.cursor()
         cursor.execute(query)
         data = cursor.fetchall()
+        
+
+    if request.form.get('action') == "purch_tick":
+        print("hi")
+        flight_num = request.form.get("flight_num")
+        airline = request.form.get("airline_name")
+        departure_date = request.form.get("departure_date")
+
         cursor.close()
-        return render_template('customer_view_flights.html', data = data)
+    return render_template('customer_view_flights.html', data = data)
+    
 
 @app.route('/customer_my_flights', methods = ["GET", "POST"]) #WORKS
 def cust_my_flights(): 
@@ -216,7 +225,6 @@ def cust_my_flights():
         cursor = conn.cursor()
         cursor.execute(query, session['email'])
         data1 = cursor.fetchall()
-
 
         cursor.close()
         return render_template('customer_my_flights.html', data=data, data1=data1) 
