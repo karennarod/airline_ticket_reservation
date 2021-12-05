@@ -135,6 +135,10 @@
     {% endfor %}
     </table><br>
     <h3>10 Most Frequent Customers</h3>
+    <form action = "/airline_logged_in" method = "POST">
+        <input type = "hidden" name = "action" value = "see_top_cust"/>
+        <input type = "submit" value = "Update"/>
+    </form>
     <table>
         <td>Customer Email</td>
         <th>Number of Flights</th>

@@ -12,10 +12,10 @@ wsgi_app = app.wsgi_app
 
 #configure MYSQL/connects to database
 conn = pymysql.connect(host = '127.0.0.1',
-					   port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
+					   #port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
 					   user = 'root',
-					   password = 'root',
-                       #password = '',
+					   #password = 'root',
+                       password = '',
 					   db = 'ticket_booking', # insert database name here 
 					   charset = 'utf8mb4',
 					   cursorclass = pymysql.cursors.DictCursor)
@@ -91,9 +91,8 @@ def cust_logged():
         error = "No existing customer for that combination of info. Please try again or register."
         return render_template('customer_login.html', error = error)
 
-    '''    
-    else:
-    
+        
+    elif request.form.get('action') == 'register':
         email = request.form.get('email')
         name = request.form.get('name')
         building_num = int(request.form.get('building_num'))
@@ -121,7 +120,7 @@ def cust_logged():
          (email, name, building_num, street, city, state, phone, pp_num, pp_exp, pp_country, dob, pw))
         cursor.close()
         return render_template('customer_logged_in.html')
-    '''
+    
 
     # CUSTOMER GRAPH #  
     cursor.execute("SELECT * FROM customer WHERE email = %s", session['email'])
@@ -174,17 +173,17 @@ def cust_view_all():
         departure_airport = request.form.get('departure_airport')
         arrival_airport = request.form.get('arrival_airport')
 
-        if departure_airport != '':
+        if departure_airport != None:
             queries.append("departure_airport = '%s'" % departure_airport)
-        if arrival_airport != '':
+        if arrival_airport != None:
             queries.append("arrival_airport = '%s'" % arrival_airport)
-        if departure_date != '':
+        if departure_date != None:
             queries.append("departure_date = '%s'" % departure_date) 
-        if arrival_date != '':
+        if arrival_date != None:
             queries.append("arrival_date = '%s'" % arrival_date) 
-        if departure_city != '':
+        if departure_city != None:
             queries.append("departure_city = '%s'" % departure_city)
-        if arrival_city != '':
+        if arrival_city != None:
             queries.append("arrival_city = '%s'" % arrival_city)
         if queries:
             query += " AND " + " AND ".join(queries)
@@ -201,12 +200,31 @@ def cust_view_all():
         flight_num = request.form.get("flight_num")
         airline = request.form.get("airline_name")
         departure_date = request.form.get("departure_date")
+        departure_time = request.form.get("departure_time")
         deb_cred = request.form.get("debit_credit")
         card_num = request.form.get("card_num")
         card_name = request.form.get("card_name")
         card_exp = request.form.get("card_exp")
-        
-        cursor.close()
+        cursor.execute("SELECT num_seats, tickets_booked, base_price FROM (SELECT flight.tickets_booked, flight.base_price, airplane.num_seats FROM flight NATURAL JOIN airplane WHERE flight.flight_num = %s AND flight.airline_name = %s AND flight.departure_date = %s AND flight.departure_time = %s) as hello WHERE num_seats > tickets_booked", (flight_num, airline, departure_date, departure_time))
+        check_available = cursor.fetchone()
+        print(check_available)
+        if check_available:
+            capacity = check_available['num_seats']
+            price = float(check_available['base_price'])
+            if (capacity*0.75) < int(check_available['tickets_booked']):
+                price = float(check_available['base_price'])*1.25
+            cursor.execute("SELECT MAX(ticket_id) as maximum FROM ticket")
+            ticket_info = cursor.fetchone()
+            ticket_id = int(ticket_info['maximum']) + 1
+            cursor.execute("SELECT DATE_FORMAT(CURTIME(), '%H:%i') as time")
+            time = cursor.fetchone()
+            time = str(time['time'])
+            cursor.execute("SELECT CURDATE() as date")
+            date = cursor.fetchone()
+            date = str(date['date'])
+            cursor.execute("INSERT INTO purchase_info VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (session['email'], ticket_id, deb_cred, card_num, card_name, card_exp, date, time, price))
+            cursor.execute("INSERT INTO ticket VALUES (%s, %s, %s, %s, %s)", (ticket_id, flight_num, departure_date, departure_time, airline))
+            cursor.close()
     return render_template('customer_view_flights.html', data = data)
     
 
@@ -230,6 +248,21 @@ def cust_my_flights():
         cursor.execute(query, session['email'])
         data1 = cursor.fetchall()
 
+        if request.form.get('action') == "give_rating":
+            flight_num = request.form.get('flight_num')
+            airline_name = request.form.get('airline_name')
+            dep_date = request.form.get('dep_date')
+            dep_time = request.form.get('dep_time')
+            rating = request.form.get('rating')
+            comment = request.form.get('comment')
+            cursor.execute("SELECT * FROM (SELECT customer_email FROM purchase_info NATURAL JOIN ticket WHERE ticket.departure_date < CURDATE() AND ticket.flight_num = %s AND ticket.airline_name = %s AND ticket.departure_date = %s AND ticket.departure_time = %s) as here WHERE customer_email = %s", (flight_num, airline_name, dep_date, dep_time, session['email']))
+            check_flight = cursor.fetchall()
+            print(check_flight)
+            if check_flight:
+                print("made it")
+                cursor.execute("INSERT INTO rating VALUES (%s, %s, %s, %s, %s, %s, %s)", (session['email'], flight_num, dep_date, dep_time, airline_name, rating, comment))
+                print("executed")
+
         cursor.close()
         return render_template('customer_my_flights.html', data=data, data1=data1) 
 
@@ -238,6 +271,8 @@ def cust_my_flights():
 #
 # BEGIN AIRLINE STAFF LOGIN
 #
+
+#to do maybe: no errors when successful
 
 
 @app.route('/airline_login', methods = ["GET", "POST"])
@@ -293,10 +328,6 @@ def airline_logged():
         error = "Airline staff not logged in. Please login and try again."
         return render_template('airline_login.html', error = error)
     
-    airline = logged_in['airline_name']
-    #cursor.execute("SELECT customer_email as email, flights_taken FROM (SELECT *, COUNT(UNIQUE ticket_id) as flights_taken FROM purchase_info NATURAL JOIN ticket WHERE airline_name = %s GROUP BY customer_email) as countflights ORDER BY flights_taken LIMIT 3", airline)
-    data3 = cursor.fetchall()
-
 
     if request.form.get('action') == "register_plane":
         cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
@@ -486,6 +517,22 @@ def airline_logged():
             cursor.close()
             return render_template('airline_logged_in.html', data2 = data2)
 
+
+    elif request.form.get("action") == "see_top_cust":
+        cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
+        logged_in = cursor.fetchone()
+        if logged_in:
+            airline = logged_in['airline_name']
+            cursor.execute("SELECT customer_email as email, flights_taken FROM (SELECT *, COUNT(ticket_id) as flights_taken FROM purchase_info NATURAL JOIN ticket WHERE ticket.airline_name = %s GROUP BY purchase_info.customer_email) as countflights ORDER BY flights_taken LIMIT 10", airline)
+            data3 = cursor.fetchall()
+            cursor.close()
+            return render_template('airline_logged_in.html', data3 = data3)
+        cursor.close()
+        error = "Airline staff not logged in. Please login and try again."
+        return render_template('airline_login.html', error = error)
+
+
+
     elif request.form.get("action") == "cust_flights":
         cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
         logged_in = cursor.fetchone()
@@ -494,7 +541,7 @@ def airline_logged():
             email = request.form.get('cust_email')
             cursor.execute("SELECT customer_email as email, flight_num, departure_date as dep_date, departure_time as dep_time FROM purchase_info NATURAL JOIN ticket WHERE airline_name = %s AND customer_email = %s", (airline, email))
             data4 = cursor.fetchall()
-            return render_template('airline_logged_in.html', data4 = data4, data3 = data3)
+            return render_template('airline_logged_in.html', data4 = data4)
 
     #Ticket Sales Graph#
     if request.form.get('action') == "update_air_graph":

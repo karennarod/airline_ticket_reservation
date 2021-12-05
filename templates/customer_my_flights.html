@@ -88,8 +88,10 @@ You can only rate the flights you have not already rated
     <form action = "/customer_my_flights" method = "POST">
 		<input type = "text" required name = "flight_num" placeholder = "flight number" pattern = "{6}"/><br>
         <input type = "text" required name = "airline_name" placeholder = "airline name" pattern = "{1,20}"/><br>
+		<input type = "date" required name = "dep_date" placeholder = "departure date"/>
+		<input type = "text" required name = "dep_time" placeholder = "departure time (HH:MM)"/>
         Your Rating
-		<input type = "number" id="rating" required name = "rating" placeholder = "rating" max="10" min="1"/><br>
+		<input type = "number" id="rating" required name = "rating" placeholder = "rating" max="5" min="1"/><br>
         <input type = "text" required name = "comment" placeholder = "Additional Comments" size="80" pattern = "{1,300}"/>
         <input type = "hidden" name = "action" value = "give_rating"/>
         <input type = "submit" value = "Submit"/><br>
