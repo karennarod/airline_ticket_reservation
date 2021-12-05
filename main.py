@@ -201,7 +201,11 @@ def cust_view_all():
         flight_num = request.form.get("flight_num")
         airline = request.form.get("airline_name")
         departure_date = request.form.get("departure_date")
-
+        deb_cred = request.form.get("debit_credit")
+        card_num = request.form.get("card_num")
+        card_name = request.form.get("card_name")
+        card_exp = request.form.get("card_exp")
+        
         cursor.close()
     return render_template('customer_view_flights.html', data = data)
     
