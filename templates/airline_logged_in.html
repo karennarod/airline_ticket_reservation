@@ -175,7 +175,7 @@
     {% endif %}
     <h3>Tickets Sold</h3>
     <!--Picture Here -->
-    <img src="assets/air_ticket_graph.png">
+    <img src="{{ graph_image }}"><br>
     Your graph range (default past year): <br>
         <form action="/airline_logged_in" method="POST">
             <input type="date" name="start_date" placeholder="start date"/>

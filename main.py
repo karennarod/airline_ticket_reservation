@@ -5,20 +5,26 @@ import time
 import matplotlib
 import matplotlib.pyplot as plt 
 matplotlib.use('Agg')
+import os
 
 app = Flask(__name__) #initialize app from flask 
+#app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+img_folder = os.path.join('static', 'imgs')
+app.config['UPLOAD_FOLDER'] = img_folder
 wsgi_app = app.wsgi_app
 
 
 #configure MYSQL/connects to database
 conn = pymysql.connect(host = '127.0.0.1',
-					   #port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
+					   port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
 					   user = 'root',
-					   #password = 'root',
-                       password = '',
+					   password = 'root',
+                       #password = '',
 					   db = 'ticket_booking', # insert database name here 
 					   charset = 'utf8mb4',
 					   cursorclass = pymysql.cursors.DictCursor)
+
+
 	
 #PUBLIC VIEW
 @app.route('/')
@@ -74,6 +80,8 @@ def cust_login():
 
 @app.route('/customer_logged_in', methods = ["GET", "POST"])
 def cust_logged():
+
+
     cursor = conn.cursor()
     if request.form.get('action') == 'login':
         email = request.form.get('email')
@@ -126,6 +134,7 @@ def cust_logged():
     cursor.execute("SELECT * FROM customer WHERE email = %s", session['email'])
     logged_in = cursor.fetchone()
     if logged_in: 
+        graph_image = os.path.join(app.config['UPLOAD_FOLDER'], 'cust_spending.png' )
         if request.form.get('action') == "update_graph":
             start_date = request.form.get("start_date")
             end_date = request.form.get("end_date")
@@ -152,8 +161,8 @@ def cust_logged():
                 graphdata[curr_month] = graphdata[curr_month] + curr_price if curr_month in graphdata else curr_price
             plt.bar(list(graphdata.keys()), list(graphdata.values()))
             plt.title('Money Spent on Flights per month')
-            plt.savefig("templates/assets/cust_spending.png", format = 'png')
-            return render_template('customer_logged_in.html', data = data)
+            plt.savefig("static/imgs/cust_spending.png", format = 'png')
+            return render_template('customer_logged_in.html', data = data, graph_image = graph_image)
 
     
 
@@ -545,10 +554,10 @@ def airline_logged():
 
     #Ticket Sales Graph#
     if request.form.get('action') == "update_air_graph":
+        graph_image = os.path.join(app.config['UPLOAD_FOLDER'], 'air_ticket_graph.png' )
         cursor.execute("SELECT username, airline_name FROM airline_staff WHERE username = %s", session['username'])
         logged_in = cursor.fetchone()
         if logged_in: 
-
             start_date = request.form.get("start_date")
             end_date = request.form.get("end_date")
             if start_date and end_date:
@@ -569,8 +578,9 @@ def airline_logged():
                 graphdata[curr_month] = graphdata[curr_month] + 1 if curr_month in graphdata else 1
             plt.bar(list(graphdata.keys()), list(graphdata.values()))
             plt.title('Ticket Sales for %s by Month' % logged_in['airline_name'])
-            plt.savefig('templates/assets/air_ticket_graph.png', format = 'png')
-            return render_template("airline_logged_in.html")
+            plt.savefig('static/imgs/air_ticket_graph.png', format = 'png')
+            print("i here")
+            return render_template("airline_logged_in.html", graph_image = graph_image)
 
     #Get Total Revenue
     if request.form.get('action') == "update_revenue":
