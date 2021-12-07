@@ -16,10 +16,10 @@ wsgi_app = app.wsgi_app
 
 #configure MYSQL/connects to database
 conn = pymysql.connect(host = '127.0.0.1',
-					   port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
+					   #port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
 					   user = 'root',
-					   password = 'root',
-                       #password = '',
+					   #password = 'root',
+                       password = '',
 					   db = 'ticket_booking', # insert database name here 
 					   charset = 'utf8mb4',
 					   cursorclass = pymysql.cursors.DictCursor)
@@ -315,6 +315,7 @@ def airline_logged():
             fn = request.form.get('first_name')
             ln = request.form.get('last_name')
             dob = request.form.get('dob')
+            pn = request.form.get('phone')
             cursor.execute("SELECT * FROM airline_staff WHERE username = %s", username)
             existing_staff = cursor.fetchall()
             if existing_staff:
@@ -326,6 +327,8 @@ def airline_logged():
 
             cursor = conn.cursor()
             cursor.execute("INSERT INTO airline_staff VALUES (%s, %s, %s, %s, %s, %s)", (username, airline, password, fn, ln, dob))
+            if pn:
+                cursor.execute("INSERT INTO staff_phone VALUES (%s, %s)", (username, pn))
             cursor.close()
             session['username'] = username
             return render_template('airline_logged_in.html')
