@@ -16,10 +16,10 @@ wsgi_app = app.wsgi_app
 
 #configure MYSQL/connects to database
 conn = pymysql.connect(host = '127.0.0.1',
-					   #port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
+					   port = 8889,              #I REMOVED THIS because I added what the prof had at the bottom of this file and that somehow solved my 3 hour problem
 					   user = 'root',
-					   #password = 'root',
-                       password = '',
+					   password = 'root',
+                       #password = '',
 					   db = 'ticket_booking', # insert database name here 
 					   charset = 'utf8mb4',
 					   cursorclass = pymysql.cursors.DictCursor)
@@ -143,22 +143,14 @@ def cust_logged():
                 print(start_date)
                 query = "SELECT * FROM ticket natural join purchase_info natural join flight WHERE purchase_date > %s and purchase_date < %s AND customer_email = %s"
                 cursor.execute(query, (start_date, end_date, session['email']))
-            else:
-                if start_date:
-                    query = "SELECT * FROM ticket natural join purchase_info natural join flight WHERE purchase_date > %s AND " \
-                            "customer_email = %s AND flight.airline_name = airline_name"
-                    cursor.execute(query, (start_date, session['email']))
-                else:
-                    query = "SELECT * FROM ticket natural join purchase_info natural join flight WHERE purchase_date > DATE_SUB(CURDATE(), INTERVAL 6 MONTH) AND customer_email = %s" \
-                            "AND flight.airline_name = airline_name"
-                    cursor.execute(query, session['email'])
+
             data = cursor.fetchall()
             print(data)
             graphdata = {}
             for line in data:
-                curr_month = line['purchase_date']
-                curr_price = int(line['sold_price'])
-                graphdata[curr_month] = graphdata[curr_month] + curr_price if curr_month in graphdata else curr_price
+                month = line['purchase_date']
+                price = int(line['sold_price'])
+                graphdata[month] = graphdata[month] + price if month in graphdata else price
             plt.bar(list(graphdata.keys()), list(graphdata.values()))
             plt.title('Money Spent on Flights per month')
             plt.savefig("static/imgs/cust_spending.png", format = 'png')
@@ -566,19 +558,11 @@ def airline_logged():
             if start_date and end_date:
                 query = "SELECT * FROM ticket NATURAL JOIN purchase_info WHERE airline_name = %s AND purchase_date >= %s AND purchase_date <= %s"
                 cursor.execute(query, (logged_in['airline_name'], start_date, end_date))
-            else:
-                if start_date:
-                    query = "SELECT * FROM ticket NATURAL JOIN purchase_info WHERE airline_name = %s AND purchase_date >= %s"
-                    cursor.execute(query, (logged_in['airline_name'], start_date))
-                else:
-                    query = "SELECT * FROM ticket NATURAL JOIN purchase_info WHERE airline_name = %s AND purchase_date >=" \
-                            "DATE_SUB(CURDATE(), INTERVAL 1 YEAR)"
-                    cursor.execute(query, logged_in['airline_name'])
             ticket_count = cursor.fetchall()
             graphdata = {}
             for line in ticket_count:
-                curr_month = line['purchase_date']
-                graphdata[curr_month] = graphdata[curr_month] + 1 if curr_month in graphdata else 1
+                month = line['purchase_date']
+                graphdata[month] = graphdata[month] + 1 if month in graphdata else 1
             plt.bar(list(graphdata.keys()), list(graphdata.values()))
             plt.title('Ticket Sales for %s by Month' % logged_in['airline_name'])
             plt.savefig('static/imgs/air_ticket_graph.png', format = 'png')
